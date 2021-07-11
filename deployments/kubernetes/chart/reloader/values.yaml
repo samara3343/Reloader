@@ -9,6 +9,7 @@ kubernetes:
   host: https://kubernetes.default
 
 reloader:
+  isArgoRollouts: false
   isOpenshift: false
   ignoreSecrets: false
   ignoreConfigMaps: false
@@ -51,10 +52,10 @@ reloader:
     labels:
       provider: stakater
       group: com.stakater.platform
-      version: v0.0.77
+      version: v0.0.97
     image:
       name: stakater/reloader
-      tag: "v0.0.77"
+      tag: v0.0.97
       pullPolicy: IfNotPresent
     # Support for extra environment variables.
     env:
@@ -64,6 +65,18 @@ reloader:
       secret:
       # field supports Key value pair as environment variables. It gets the values from other fields of pod.
       field:
+
+    # Liveness and readiness probe timeout values.
+    livenessProbe: {}
+    #  timeoutSeconds: 5
+    #  failureThreshold: 5
+    #  periodSeconds: 10
+    #  successThreshold: 1
+    readinessProbe: {}
+    #  timeoutSeconds: 15
+    #  failureThreshold: 5
+    #  periodSeconds: 10
+    #  successThreshold: 1
 
     # Specify resource requests/limits for the deployment.
     # Example:
@@ -77,6 +90,7 @@ reloader:
     resources: {}
     pod:
       annotations: {}
+    priorityClassName: ""
 
   service: {}
     # labels: {}
@@ -91,9 +105,10 @@ reloader:
     # Specifies whether a ServiceAccount should be created
     create: true
     labels: {}
+    annotations: {}
     # The name of the ServiceAccount to use.
     # If not set and create is true, a name is generated using the fullname template
-    name: 
+    name:
   # Optional flags to pass to the Reloader entrypoint
   # Example:
   #   custom_annotations:
@@ -111,4 +126,15 @@ reloader:
     # labels:
     # Set timeout for scrape
     # timeout: 10s
-  
+
+  podMonitor:
+    # enabling this requires service to be enabled as well, or no endpoints will be found
+    enabled: false
+    # Set the namespace the podMonitor should be deployed
+    # namespace: monitoring
+    # Set how frequently Prometheus should scrape
+    # interval: 30s
+    # Set labels for the podMonitor, use this to define your scrape label for Prometheus Operator
+    # labels:
+    # Set timeout for scrape
+    # timeout: 10s

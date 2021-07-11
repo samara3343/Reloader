@@ -1,10 +1,12 @@
 package kube
 
 import (
+	"context"
 	"os"
 
 	"k8s.io/client-go/tools/clientcmd"
 
+	argorollout "github.com/argoproj/argo-rollouts/pkg/client/clientset/versioned"
 	appsclient "github.com/openshift/client-go/apps/clientset/versioned"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
@@ -15,6 +17,7 @@ import (
 type Clients struct {
 	KubernetesClient    kubernetes.Interface
 	OpenshiftAppsClient appsclient.Interface
+	ArgoRolloutClient   argorollout.Interface
 }
 
 var (
@@ -38,10 +41,26 @@ func GetClients() Clients {
 		}
 	}
 
+	var rolloutClient *argorollout.Clientset
+
+	rolloutClient, err = GetArgoRolloutClient()
+	if err != nil {
+		logrus.Warnf("Unable to create ArgoRollout client error = %v", err)
+	}
+
 	return Clients{
 		KubernetesClient:    client,
 		OpenshiftAppsClient: appsClient,
+		ArgoRolloutClient:   rolloutClient,
 	}
+}
+
+func GetArgoRolloutClient() (*argorollout.Clientset, error) {
+	config, err := getConfig()
+	if err != nil {
+		return nil, err
+	}
+	return argorollout.NewForConfig(config)
 }
 
 func isOpenshift() bool {
@@ -49,7 +68,7 @@ func isOpenshift() bool {
 	if err != nil {
 		logrus.Fatalf("Unable to create Kubernetes client error = %v", err)
 	}
-	_, err = client.RESTClient().Get().AbsPath("/apis/project.openshift.io").Do().Raw()
+	_, err = client.RESTClient().Get().AbsPath("/apis/project.openshift.io").Do(context.TODO()).Raw()
 	if err == nil {
 		logrus.Info("Environment: Openshift")
 		return true

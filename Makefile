@@ -14,7 +14,7 @@ TAG ?= v0.0.75.0
 REPOSITORY_GENERIC = ${DOCKER_IMAGE}:${TAG}
 REPOSITORY_ARCH = ${DOCKER_IMAGE}:${TAG}-${ARCH}
 
-VERSION=$(shell cat .version)
+VERSION ?= 0.0.1
 BUILD=
 
 GOCMD = go
@@ -90,6 +90,7 @@ deploy: binary-image push apply
 
 # Bump Chart
 bump-chart: 
-	sed -i "s/^version:.*/version:  $(VERSION)/" deployments/kubernetes/chart/reloader/Chart.yaml
-	sed -i "s/^appVersion:.*/appVersion:  $(VERSION)/" deployments/kubernetes/chart/reloader/Chart.yaml
-	sed -i "s/tag:.*/tag:  v$(VERSION)/" deployments/kubernetes/chart/reloader/values.yaml
+	sed -i "s/^version:.*/version: v$(VERSION)/" deployments/kubernetes/chart/reloader/Chart.yaml
+	sed -i "s/^appVersion:.*/appVersion: v$(VERSION)/" deployments/kubernetes/chart/reloader/Chart.yaml
+	sed -i "s/tag:.*/tag: v$(VERSION)/" deployments/kubernetes/chart/reloader/values.yaml
+	sed -i "s/version:.*/version: v$(VERSION)/" deployments/kubernetes/chart/reloader/values.yaml
